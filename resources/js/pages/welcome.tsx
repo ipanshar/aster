@@ -52,7 +52,7 @@ export default function Welcome() {
 
                 {/* Приветственное сообщение */}
                 <h1 className="text-2xl font-semibold text-center">
-                    Добро пожаловать от компании Aster Project!
+                    Добро пожаловать!
                 </h1>
                 <p className="text-center text-lg text-gray-600 mt-2">
                     Мы рады видеть вас здесь.

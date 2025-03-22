@@ -57,6 +57,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 20,
     },
+    dateRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
     table: {
         marginVertical: 10,
     },
@@ -95,12 +100,15 @@ const styles = StyleSheet.create({
 });
 
 // Компонент PDF
-const CommercialOfferPDF: React.FC<{ selectedProducts: Product[]; user: User }> = ({ selectedProducts, user }) => (
+const CommercialOfferPDF: React.FC<{ selectedProducts: Product[]; user: User; exchangeRateUSD: number }> = ({ selectedProducts, user, exchangeRateUSD }) => (
     <Document>
         <Page size="A4" style={styles.page}>
             <Image style={styles.logo} src="/aster-logo.png" />
             <Text style={styles.header}>Коммерческое предложение</Text>
-            <Text>Дата: {new Date().toLocaleDateString()}</Text>
+            <View style={styles.dateRow}>
+                <Text>Дата: {new Date().toLocaleDateString()}</Text>
+                <Text>Курс USD: {exchangeRateUSD}</Text>
+            </View>
             <View style={styles.table}>
                 <View style={styles.tableRow}>
                     <Text style={[styles.tableColID, styles.tableHeader]}>ID</Text>
@@ -124,10 +132,12 @@ const CommercialOfferPDF: React.FC<{ selectedProducts: Product[]; user: User }> 
     </Document>
 );
 
+// Главный компонент Dashboard
 export default function Dashboard() {
     const { user, setUser } = useUser();
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+    const [exchangeRateUSD, setExchangeRateUSD] = useState<number | null>(null);
 
     useEffect(() => {
         axios.get('/profile/user').then((response) => {
@@ -152,7 +162,18 @@ export default function Dashboard() {
                 console.error('Ошибка при получении данных:', error);
             }
         };
+
+        const fetchExchangeRateUSD = async () => {
+            try {
+                const response = await axios.get('/exchange-rate/USD');
+                setExchangeRateUSD(response.data.rate);
+            } catch (error) {
+                console.error('Ошибка при получении курса USD:', error);
+            }
+        };
+
         fetchProducts();
+        fetchExchangeRateUSD();
     }, []);
 
     const filteredProducts = products.filter((product) => selectedProducts.includes(product.id));
@@ -165,10 +186,10 @@ export default function Dashboard() {
     ];
 
     const handleDownload = async () => {
-        if (!user || filteredProducts.length === 0) return;
+        if (!user || filteredProducts.length === 0 || !exchangeRateUSD) return;
 
         const blob = await pdf(
-            <CommercialOfferPDF selectedProducts={filteredProducts} user={user} />
+            <CommercialOfferPDF selectedProducts={filteredProducts} user={user} exchangeRateUSD={exchangeRateUSD} />
         ).toBlob();
 
         saveAs(blob, 'Commercial_Offer_Aster_Project.pdf');
@@ -178,19 +199,25 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Панель управления" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                {/* Отображение текущего курса USD */}
+                <div className="flex justify-end items-center">
+                    <p style={{ marginRight: '20px', fontSize: '16px', fontWeight: 'bold' }}>
+                        Курс USD: {exchangeRateUSD ? `${exchangeRateUSD}` : 'Загрузка...'}
+                    </p>
+                </div>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
                     <div style={{ width: '100%' }}>
                         <div style={{ padding: '10px' }}>
                             <h2>Список продукции</h2>
                             <button
                                 onClick={handleDownload}
-                                disabled={filteredProducts.length === 0 || !user}
+                                disabled={filteredProducts.length === 0 || !user || !exchangeRateUSD}
                                 style={{
                                     textDecoration: 'none',
                                     color: '#fff',
-                                    backgroundColor: filteredProducts.length > 0 ? 'green' : 'gray',
+                                    backgroundColor: filteredProducts.length > 0 && exchangeRateUSD ? 'green' : 'gray',
                                     borderRadius: '5px',
-                                    cursor: filteredProducts.length > 0 ? 'pointer' : 'not-allowed',
+                                    cursor: filteredProducts.length > 0 && exchangeRateUSD ? 'pointer' : 'not-allowed',
                                     padding: '10px 20px',
                                 }}
                             >
