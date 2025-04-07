@@ -4,8 +4,7 @@
     flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку */
 }
 .dataGrid-container{
-    width: calc(100vw - 20rem);
-    max-width: 100vw;
+    width: calc(100vw - 20vw);
     padding: 10px;
     overflow-x: auto;
 }

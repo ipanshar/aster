@@ -149,7 +149,7 @@ export default function ProductsManagement() {
                 <div>
                     <ImportProducts/>
                 </div>
-                <div   className="dataGrid-container" style={{ height: 400 }} >
+                <div   className="dataGrid-container"  >
                     <DataGrid
                         rows={products}
                         columns={productColumns}
