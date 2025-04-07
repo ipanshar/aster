@@ -104,6 +104,7 @@ const CommercialOfferPDF: React.FC<{ selectedProducts: Product[]; user: User; ex
     <Document>
         <Page size="A4" style={styles.page}>
             <Image style={styles.logo} src="/aster-logo.png" />
+            <Text  style={styles.dateRow}>ТОО «Aster Project» («Астер Проджект»)Юридический адрес: г.Алматы, Наурызбайский район, ул. Кенесары Хана 54/20, офис 20ЖК «Хан Тенгри» , эл.адрес: info@aster-project.kzБИН 140640020043 в АО «Банк ЦентрКредит» БСКБИК (SWIFT) KCJBKZKX; ИИК KZ858562203116747548 (KZT); КБЕ 17</Text>
             <Text style={styles.header}>Коммерческое предложение</Text>
             <View style={styles.dateRow}>
                 <Text>Дата: {new Date().toLocaleDateString()}</Text>
